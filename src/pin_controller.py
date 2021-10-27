@@ -117,4 +117,5 @@ pin_util.create({'pin_num': 4, 'color': 'yellow', 'state': 'off'})
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
+    
