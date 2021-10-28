@@ -24,7 +24,7 @@ while True:
     # Calculate percentage of light
     percentage = (float)(sensor_value) / 1023 * 100
 
-    if percentage > threshold:
+    if percentage < threshold:
         # Send HIGH to switch on LED
         grovepi.digitalWrite(led,1)
         print("Led ON")
@@ -34,9 +34,11 @@ while True:
         print("Led OFF")
 
     print("Percentage = %.2f" %(percentage))
+    
+    text = "%.1f" %(percentage)
 
     # Set blackligth of the LCD
     setRGB(0,0,255)
     # Display ligth level on LCD
-    setText("Light level:" + str(percentage))
+    setText("Light level:" + text)
     time.sleep(.5)
