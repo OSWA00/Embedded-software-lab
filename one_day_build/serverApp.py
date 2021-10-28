@@ -1,30 +1,52 @@
 import json
+import time
 from flask import Flask
-from flask import request, jsonify
+from flask import request, jsonify, render_template
+import grovepi
+from grove_rgb_lcd import *
+
+# Connect the Grove Light Sensor to analog port A0
+# SIG,NC,VCC,GND
+light_sensor = 0
+
+# Connect the LED to digital port D4
+# SIG,NC,VCC,GND
+led = 4
+
+# Turn on LED once sensor exceeds threshold percentage
+threshold = 10
+
+# Set pins modes
+grovepi.pinMode(light_sensor,"INPUT")
+grovepi.pinMode(led,"OUTPUT")
+
+# Set blackligth of the LCD
+setRGB(0,0,255)
 
 app = Flask(__name__)
 
-sensors = [
-    {
+sensors = {
         "Light":{
             "level":0, 
             "ref"  :0
         }
-    }
-]
+}
 
-actuators = [
-    {
+actuators = {
         "Led":{
             "state":0,
             "mode" :0
         }
-    }
-]
+}
+
 
 @app.route("/")
-def hello():
-    return "Smart Home monitoring app"
+def home():
+    # Read sensor status
+    sensor_value = grovepi.analogRead(light_sensor)
+    lightStats = (float)(sensor_value) / 1023 * 100
+    sensors["Light"["level"]] = "%.1f" %(lightStats)
+    return render_template('template/home.html', **sensors)
 
 @app.route("/about")
 def about():
@@ -45,17 +67,6 @@ def getActuator(act_type, atrib):
     except KeyError:
         return act_type + "'s " + atrib + "Not Found"
 
-@app.route('/api/sensors/',methods=['POST'])
-def createSensor():
-    request_data = request.get_json()
-    sensors.append(request_data)
-    return jsonify( request_data )
-
-@app.route('/api/actuators/',methods=['POST'])
-def createActuator():
-    request_data = request.get_json()
-    actuators.append(request_data)
-    return jsonify( request_data )
 
 @app.route('/api/sensors/<sen_type>/ref', methods=['PUT'])
 def update_ref(sen_type):
@@ -76,4 +87,4 @@ def update_mode(act_type):
         return json.dumps({'message': 'Actuator not found'})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
