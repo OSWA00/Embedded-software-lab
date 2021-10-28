@@ -66,7 +66,7 @@ def update_ref(sen_type):
     except KeyError:
         return json.dumps({'message': 'Sensor not found'})
 
-@app.route('/api/sensors/<act_type>/mode', methods=['PUT'])
+@app.route('/api/actuators/<act_type>/mode', methods=['PUT'])
 def update_mode(act_type):
     try:
         request_data = request.get_json()
