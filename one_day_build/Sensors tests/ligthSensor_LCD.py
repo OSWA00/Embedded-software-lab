@@ -17,12 +17,16 @@ threshold = 10
 grovepi.pinMode(light_sensor,"INPUT")
 grovepi.pinMode(led,"OUTPUT")
 
+# Set blackligth of the LCD
+setRGB(0,0,255)
+
 while True:
     # Get sensor value
     sensor_value = grovepi.analogRead(light_sensor)
 
     # Calculate percentage of light
     percentage = (float)(sensor_value) / 1023 * 100
+    percentageStr = "%.1f" %(percentage)
 
     if percentage < threshold:
         # Send HIGH to switch on LED
@@ -35,10 +39,6 @@ while True:
 
     print("Percentage = %.2f" %(percentage))
     
-    text = "%.1f" %(percentage)
-
-    # Set blackligth of the LCD
-    setRGB(0,0,255)
     # Display ligth level on LCD
-    setText("Light level:" + text)
+    setText_norefresh("Light level:" + percentageStr)
     time.sleep(.5)
