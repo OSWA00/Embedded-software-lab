@@ -33,7 +33,7 @@ sensors = {
 }
 
 actuators = {
-        "Led":{
+        "LED":{
             "state":0,
             "mode" :0
         }
@@ -45,68 +45,87 @@ def home():
     sensor_value = grovepi.analogRead(light_sensor)
     lightStats = (float)(sensor_value) / 1023 * 100
     sensors["light"]["level"] = "%.1f" %(lightStats)
-    setText_norefresh("Light level:" + sensors["light"]["level"])
-    return render_template('home.html', **sensors)
+    setText_norefresh("Light level:" + sensors["light"]["level"]) # LCD
+    template_data = {
+        'light_lev': sensors["light"]["level"],
+        'led_stat' : actuators["LED"]["state"]
+    }
+    return render_template('home.html', **template_data)
 
 @app.route("/about")
 def about():
     return '''This system allows the user to monitor sensors
               and modify some basic smart home configurations'''
 
-@app.route('/api/sensors/<sen_type>/',methods=['GET'])
-def getSensor(sen_type):
-    try:
-        setText_norefresh("Light level:" + sensors["light"]["level"])
-        return jsonify(sensors[sen_type])
-    except KeyError:
-        return sen_type + " sensor" + "Not Found"
-
-@app.route('/api/actuators/<act_type>/',methods=['GET'])
-def getActuator(act_type, atrib):
-    try:
-        setText_norefresh("Light level:" + sensors["light"]["level"])
-        return jsonify(actuators[act_type])
-    except KeyError:
-        return act_type + "'s " + atrib + "Not Found"
+@app.route('/api/sensors/light/',methods=['GET'])
+def getSensor():
+    setText_norefresh("Light level:" + sensors["light"]["level"])
+    sensor_value = grovepi.analogRead(light_sensor)
+    lightStats = (float)(sensor_value) / 1023 * 100
+    template_data = {
+        'light_lev': sensors["light"]["level"],
+        'led_stat' : actuators["LED"]["state"]
+    }
+    return render_template('home.html', **template_data)
 
 
-@app.route('/api/sensors/<sen_type>/ref', methods=['PATCH'])
-def update_ref(sen_type):
+@app.route('/api/actuators/LED/',methods=['GET'])
+def getActuator():
+    setText_norefresh("Light level:" + sensors["light"]["level"])
+    template_data = {
+    'light_lev': sensors["light"]["level"],
+    'led_stat' : actuators["LED"]["state"]
+    }
+    return render_template('home.html',**template_data)
+
+
+@app.route('/api/sensors/light/ref', methods=['PATCH'])
+def update_ref():
     global threshold
     try:
         request_data = request.get_json()
         if (request_data.isnumeric()):
-            sensors[sen_type]['ref'] = request_data['ref']
-            threshold = int(sensors[sen_type]['ref'])
+            sensors["light"]['ref'] = request_data['ref']
+            threshold = int(sensors["light"]['ref'])
         return jsonify(sensors)
     except KeyError:
         return json.dumps({'message': 'Sensor not found'})
 
-@app.route('/api/actuators/<act_type>/mode', methods=['PATCH'])
-def update_mode(act_type):
+@app.route('/api/actuators/LED/mode', methods=['PATCH'])
+def update_mode():
     try:
-        request_data = request.get_json()
-        actuators[act_type]['mode'] = request_data['mode']
+        request_data = request.form['mode']
+        if (request_data.isnumeric()):
+            actuators["LED"]["mode"] = int(request_data)
+            if (actuators["LED"]['mode'] == 1):
+                grovepi.digitalWrite(led, 1) #! Change hardware function
+            elif (actuators["LED"]['mode'] == 0):
+                grovepi.digitalWrite(led, 0) #! Change hardware function
+        actuators["LED"]['mode'] = request_data['mode']
         setText_norefresh("Light level:" + sensors["light"]["level"])
         return jsonify(actuators)
     except KeyError:
         return json.dumps({'message': 'Actuator not found'})
 
 
-@app.route('/api/actuators/<act_type>/state', methods=['PATCH'])
-def update_state(act_type):
-    try:
-        request_data = request.get_json()
-        actuators[act_type]['state'] = request_data['state']
-        if (actuators[act_type]['state'] == 1):
+@app.route('/api/actuators/LED/state/', methods=['PATCH'])
+def update_state():
+    request_data = request.form['state']
+    if (request_data.isnumeric()):
+        actuators["LED"]['state'] = int(request_data)
+        if (actuators["LED"]['state'] == 1):
             grovepi.digitalWrite(led, 1)
-        elif (actuators[act_type]['state'] == 0):
+        elif (actuators["LED"]['state'] == 0):
             grovepi.digitalWrite(led, 0)
-        setText_norefresh("Light level:" + sensors["light"]["level"])
-        return jsonify(actuators)
-    except KeyError:
-        return json.dumps({'message': 'Actuator not found'})
+    setText_norefresh("Light level:" + sensors["light"]["level"])
+    template_data = {
+        'light_lev': sensors["light"]["level"],
+        'led_stat' : actuators["LED"]["state"]
+    }
+    return render_template('home.html',**template_data)
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
