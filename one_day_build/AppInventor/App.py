@@ -62,9 +62,9 @@ def getSensor(sen_type):
         return sen_type + " sensor" + "Not Found"
 
 @app.route('/api/actuators/<act_type>/',methods=['GET'])
-def getActuator(act_type, atrib):
+def getActuator(act_type):
     try:
-        setText_norefresh("Light level:" + sensors["light"]["level"])
+        print(actuators[act_type])
         return jsonify(actuators[act_type])
     except KeyError:
         return act_type + "'s " + atrib + "Not Found"
@@ -103,7 +103,7 @@ def update_state(act_type):
             grovepi.digitalWrite(led, 1)
         elif (actuators[act_type]['state'] == '0'):
             grovepi.digitalWrite(led, 0)
-        return jsonify(actuators)
+        return jsonify(actuators[act_type])
     except KeyError:
         return json.dumps({'message': 'Actuator not found'})
 
