@@ -26,7 +26,7 @@
     <h3>LED state</h3> 
     <p>Write 0 for off and 1 for on</p>
     
-    <form action="/api/actuators/LED/state/" method="PATCH">
+    <form action="ip:5000/api/actuators/LED/state/" method="POST">
         <input name="state">
         <input type=submit>
     </form>

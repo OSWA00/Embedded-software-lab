@@ -62,6 +62,7 @@ def getSensor():
     setText_norefresh("Light level:" + sensors["light"]["level"])
     sensor_value = grovepi.analogRead(light_sensor)
     lightStats = (float)(sensor_value) / 1023 * 100
+    sensors["light"]["level"] = "%.1f" %(lightStats)
     template_data = {
         'light_lev': sensors["light"]["level"],
         'led_stat' : actuators["LED"]["state"]
@@ -108,7 +109,7 @@ def update_mode():
         return json.dumps({'message': 'Actuator not found'})
 
 
-@app.route('/api/actuators/LED/state/', methods=['PATCH'])
+@app.route('/api/actuators/LED/state/', methods=['POST'])
 def update_state():
     request_data = request.form['state']
     if (request_data.isnumeric()):
