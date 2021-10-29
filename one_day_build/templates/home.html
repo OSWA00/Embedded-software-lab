@@ -10,20 +10,26 @@
 <body>
     <h1>One day build</h1>
     <h3>Light sensor status</h3>
-
-    <h3>Change light warning reference</h3>
-    <form method="POST">
-        <input light_ref="Enter new reference">
-        <input type ="submit">
+    <p> {{light_lev}} </p>  
+    <form action="ip:5000/api/sensors/light/" method="GET">
+        <button type="submit"> Refresh light level </button> 
     </form>
-    <h3>LED status</h3> 
+
+    <h3>Light status</h3>
+    <p> {{led_stat}} </p>  
+    <form action="ip:5000/api/actuators/LED/" method="GET">
+        <button type="submit"> Refresh LED status </button> 
+    </form>
+
     
-    <button class="button">Turn on</button> 
-    <button class="button">Turn off</button>
 
-
-
-
+    <h3>LED state</h3> 
+    <p>Write 0 for off and 1 for on</p>
+    
+    <form action="/api/actuators/LED/state/" method="PATCH">
+        <input name="state">
+        <input type=submit>
+    </form>
 
 </body>
 
