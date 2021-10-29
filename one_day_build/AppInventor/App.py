@@ -1,7 +1,6 @@
 import json
-import time
 from flask import Flask
-from flask import request, jsonify, render_template
+from flask import request, jsonify
 import grovepi
 from grove_rgb_lcd import *
 
@@ -23,32 +22,21 @@ grovepi.pinMode(led,"OUTPUT")
 # Set blackligth of the LCD
 setRGB(0,0,255)
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 
 sensors = {
-    "light":{"level":0, "ref"  :0}
+    "light":{
+        "level":0, 
+        "id"   :1
+    }
 }
 
 actuators = {
         "Led":{
             "state":0,
-            "mode" :0
+            "id"   :1
         }
 }
-
-@app.route("/")
-def home():
-    # Read sensor status
-    sensor_value = grovepi.analogRead(light_sensor)
-    lightStats = (float)(sensor_value) / 1023 * 100
-    sensors["light"]["level"] = "%.1f" %(lightStats)
-    setText_norefresh("Light level:" + sensors["light"]["level"])
-    return render_template('home.html', **sensors)
-
-@app.route("/about")
-def about():
-    return '''This system allows the user to monitor sensors
-              and modify some basic smart home configurations'''
 
 @app.route('/api/sensors/<sen_type>/',methods=['GET'])
 def getSensor(sen_type):
@@ -66,29 +54,6 @@ def getActuator(act_type):
     try:
         print(actuators[act_type])
         return jsonify(actuators[act_type])
-    except KeyError:
-        return act_type + "'s " + atrib + "Not Found"
-
-
-@app.route('/api/sensors/<sen_type>/ref', methods=['PATCH'])
-def update_ref(sen_type):
-    global threshold
-    try:
-        request_data = request.get_json()
-        if (request_data.isnumeric()):
-            sensors[sen_type]['ref'] = request_data['ref']
-            threshold = int(sensors[sen_type]['ref'])
-        return jsonify(sensors)
-    except KeyError:
-        return json.dumps({'message': 'Sensor not found'})
-
-@app.route('/api/actuators/<act_type>/mode', methods=['PATCH'])
-def update_mode(act_type):
-    try:
-        request_data = request.get_json()
-        actuators[act_type]['mode'] = request_data['mode']
-        setText_norefresh("Light level:" + sensors["light"]["level"])
-        return jsonify(actuators)
     except KeyError:
         return json.dumps({'message': 'Actuator not found'})
 
