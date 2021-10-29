@@ -20,13 +20,11 @@
     <form action="http://192.168.100.26:5000/api/actuators/LED/" method="GET">
         <button type="submit"> Refresh LED status </button> 
     </form>
-
-    
-
+  
     <h3>LED state</h3> 
     <p>Write 0 for off and 1 for on</p>
     
-    <form action="http://192.168.100.26:5000/api/actuators/LED/state/" method="PUT">
+    <form action="ip:5000/api/actuators/LED/state/" method="POST">
         <input name="state">
         <input type=submit>
     </form>
